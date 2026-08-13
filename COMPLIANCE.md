@@ -44,12 +44,11 @@
 | 项目 | 状态 | 实现依据 |
 | --- | --- | --- |
 | 五个支持模型。 | 通过 | Gemini Preview、`gpt-image-2`、Grok Imagine 与 Agnes 均已实现。 |
-| GPT 图像规格映射。 | 通过 | 1K、2K、4K 的像素映射与参考项目一致。 |
+| GPT 图像规格映射。 | 通过 | 1K、2K、4K 均按支持的宽高比映射为对应像素规格。 |
 | Gemini 原生请求。 | 通过 | 使用 `generateContent`、`responseModalities`、`imageConfig`、`inlineData`、`fileData`。 |
 | GPT/OpenAI Images 请求。 | 通过 | 使用 generations/edits、`size`、`quality`、`n`、`output_format` 与本地 multipart 编辑。 |
 | Grok 请求。 | 通过 | 使用 OpenAI 兼容路径、`resolution`、`aspect_ratio`，不发送 `quality` 和 `size`。 |
 | Agnes 请求。 | 通过 | 使用原生 generations、`size`、`ratio`、`extra_body.image`，不发送 `quality`。 |
 | 异步任务生命周期。 | 通过 | 请求含 `async: true`，校验 `202`，轮询 `query_path`，处理终态并保存首个结果。 |
 | 两阶段超分。 | 通过 | 生成源图，作为第二阶段唯一参考图；结束后清理临时目录。 |
-| 桌面端 UI 功能。 | 不适用 | 弹窗、故事板、缩略图、批量超分与任务日志不属于 Harness 模型工具职责。 |
-| 超大参考图压缩。 | 有意差异 | Bundle 用 `maxReferenceBytes` 明确限制并报错，不引入 Pillow 或原生处理依赖。 |
+| 超大本地参考图。 | 通过 | 通过 `maxReferenceBytes` 限制输入大小，并在超过限制时明确报错。 |

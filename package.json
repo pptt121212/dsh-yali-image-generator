@@ -1,6 +1,6 @@
 {
   "name": "deepseek-harness-yali-image-generator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DeepSeek-Harness 图像生成插件，提供基于 Yali AI 异步网关的图像生成工具。",
   "license": "MIT",
   "repository": {

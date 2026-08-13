@@ -17,8 +17,6 @@
 
 ## 支持的模型与接口
 
-接口行为严格参考 `D:\222\yaliai-async-image-plugin`。
-
 | 模型 | 接口 | 规格 | 说明 |
 | --- | --- | --- | --- |
 | `gemini-3.1-flash-image-preview` | `POST /v1beta/models/{model}:generateContent` | `1K`、`2K`、`4K` | 支持完整 Gemini 宽高比；使用 `contents`、`responseModalities: ["IMAGE"]` 与 `imageConfig`。 |
@@ -30,22 +28,6 @@
 Gemini 的本地参考图使用 `inlineData`，URL 参考图使用 `fileData`。GPT 的本地参考图采用 multipart `image`，URL 参考图采用 JSON `image`。所有模型均使用异步任务：提交请求、校验 `202` 和 `task_id`、轮询 `query_path`，再下载或解码首个图像结果。
 
 ## 安装
-
-### 本地 tarball 安装
-
-在 DeepSeek Harness 源码目录中打包并安装到 Web Profile：
-
-```powershell
-cd D:\222\deepseek-harness\deepseek-harness-yali-image-generator
-corepack pnpm pack
-
-cd D:\222\deepseek-harness
-corepack pnpm dsh plugin --profile web add -w D:\222\deepseek-harness\deepseek-harness-yali-image-generator\deepseek-harness-yali-image-generator-0.1.0.tgz
-corepack pnpm dsh web --dump-config
-corepack pnpm dsh web
-```
-
-`-w` 仅在 Harness 源码仓库根目录中运行 `pnpm dsh` 时需要，用于绕过 pnpm 的 workspace 根目录保护。
 
 ### npm 安装
 
@@ -76,7 +58,7 @@ dsh --profile my-profile --dump-config
 dsh --profile my-profile
 ```
 
-本包直接发布 ESM 运行时文件，不需要构建步骤或 `prepare` 脚本，因此 tarball、npm 和 git 安装方式均可用。
+本包直接发布 ESM 运行时文件，不需要构建步骤或 `prepare` 脚本。
 
 ## 配置密钥
 
@@ -100,23 +82,3 @@ $env:YALI_AGNES_API_KEY = "..."
 ```
 
 常用参数：`prompt`（必填）、`model`、`aspect_ratio`、`image_size`、`quality`、`reference_image_paths`、`reference_image_urls`、`output_name`。`generation_mode: "upscale"` 会先生成基础图像，再由 `upscale_model` 完成第二阶段超分。默认输出目录为 `./generated/yali-images`。
-
-## 本地开发
-
-开发时可直接通过绝对路径补丁加载本地模块：
-
-```powershell
-cd D:\222\deepseek-harness\deepseek-harness-yali-image-generator
-corepack pnpm install --ignore-workspace
-
-cd D:\222\deepseek-harness
-corepack pnpm dsh web --patch ./deepseek-harness-yali-image-generator/local.patch.yml
-```
-
-`local.patch.yml` 使用 `file:///D:/...` URL，因为 Node ESM 不能直接加载 Windows 的 `D:/...` 模块路径。
-
-## 与参考项目的范围关系
-
-本插件移植了参考项目的模型选择、请求字段、异步任务轮询、规格映射、参考图提交和两阶段超分逻辑。桌面插件专属的弹窗、故事板替换、缩略图持久化、手动批量超分和任务日志界面不属于 Harness 的模型工具范围。
-
-超过 `maxReferenceBytes` 的本地参考图会明确报错。参考桌面项目会借助 Pillow 压缩大图；本 Bundle 不引入原生图像处理依赖，以保持 Harness Profile 安装可靠。
