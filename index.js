@@ -5,8 +5,8 @@ import { basename, extname, isAbsolute, join, resolve } from 'node:path'
 import Schema from '@deepseek-ai/schemastery'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 
-export const name = 'deepseek-harness-yali-image-generator'
-export const inject = ['tools']
+export const name = 'dsh-yali-image-generator'
+export const inject = ['tools', 'credentials']
 
 const DEFAULT_UPSCALE_PROMPT = '现在对这张图进行全景像素超分（Panorama Super-Resolution）与重绘。请将图像精细度和文字边缘细节提升至 {image_size} 电影级分辨率。场景清晰不允许存在锯齿和噪点，颜色纯净。请在画面中原地追加细节。保持图像 {aspect_ratio} 比例，不要因为限制图像比例而使用变形的素材和文字。图像比例不对将判定为任务失败！'
 
@@ -117,6 +117,7 @@ const TOOL_OUTPUT_SCHEMA = {
 
 export function apply(ctx, config) {
   const resolved = resolveConfig(config)
+  const resolveApiKey = createApiKeyResolver(ctx, resolved)
 
   ctx.tools.register(defineTool({
     name: 'generate_image',
@@ -151,7 +152,7 @@ export function apply(ctx, config) {
       resolved.asyncMaxWaitMs,
     ),
     async execute(args, exec) {
-      return generateImage(args, exec, resolved)
+      return generateImage(args, exec, resolved, resolveApiKey)
     },
     presentCall(args) {
       const generationMode = args.generation_mode ?? resolved.defaultGenerationMode
@@ -180,7 +181,7 @@ function resolveConfig(config) {
   return { ...config, endpoint, outputDir }
 }
 
-async function generateImage(args, exec, config) {
+async function generateImage(args, exec, config, resolveApiKey) {
   const prompt = normalizeNonEmpty(args.prompt, 'prompt')
   const model = args.model ?? config.defaultModel
   const aspectRatio = args.aspect_ratio ?? config.defaultAspectRatio
@@ -195,7 +196,7 @@ async function generateImage(args, exec, config) {
     const upscaleModel = args.upscale_model ?? config.defaultUpscaleModel
     const upscaleImageSize = args.upscale_image_size ?? config.defaultUpscaleImageSize
     validateNativeImageParameters(upscaleModel, upscaleImageSize, aspectRatio)
-    assertApiKey(config, upscaleModel, 'upscale model')
+    await resolveApiKey(upscaleModel, '超分模型')
 
     const stagingDir = await mkdtemp(join(tmpdir(), 'dsh-yali-upscale-'))
     try {
@@ -209,6 +210,7 @@ async function generateImage(args, exec, config) {
         quality,
         references,
         requestId: newRequestId('source'),
+        resolveApiKey,
       })
       const sourcePath = await saveOutput(source.output, stagingDir, sourceFileName(prompt), config, exec.signal)
       const upscalePrompt = renderUpscalePrompt(args.upscale_prompt ?? config.defaultUpscalePrompt, upscaleImageSize, aspectRatio)
@@ -222,6 +224,7 @@ async function generateImage(args, exec, config) {
         quality,
         references: [{ kind: 'path', value: sourcePath }],
         requestId: newRequestId('upscale'),
+        resolveApiKey,
       })
       const finalPath = await saveOutput(final.output, config.outputDir, args.output_name, config, exec.signal)
       return {
@@ -255,6 +258,7 @@ async function generateImage(args, exec, config) {
     quality,
     references,
     requestId: newRequestId('single'),
+    resolveApiKey,
   })
   const saved = await saveOutput(stage.output, config.outputDir, args.output_name, config, exec.signal)
   return {
@@ -274,9 +278,8 @@ async function generateImage(args, exec, config) {
   }
 }
 
-async function requestStage({ config, exec, prompt, model, aspectRatio, imageSize, quality, references, requestId }) {
-  assertApiKey(config, model, 'model')
-  const apiKey = apiKeyForModel(config, model)
+async function requestStage({ config, exec, prompt, model, aspectRatio, imageSize, quality, references, requestId, resolveApiKey }) {
+  const apiKey = await resolveApiKey(model, '模型')
   const request = await buildStageRequest(config, { model, prompt, references, aspectRatio, imageSize, quality }, exec.signal)
   const accepted = await submitAsyncRequest(config, request.url, apiKey, requestId, request.body, request.formData, exec.signal)
   const output = await pollAsyncTask(config, apiKey, accepted, exec.signal)
@@ -599,25 +602,24 @@ function modelProtocol(model) {
   return 'gemini'
 }
 
-function apiKeyForModel(config, model) {
+function apiKeyEnvForModel(config, model) {
   const envName = {
     openai_image: config.gptApiKeyEnv,
     gemini: config.geminiApiKeyEnv,
     grok_image: config.grokApiKeyEnv,
     agnes_image: config.agnesApiKeyEnv,
   }[modelProtocol(model)]
-  return process.env[envName]?.trim() ?? ''
+  return envName
 }
 
-function assertApiKey(config, model, label) {
-  if (apiKeyForModel(config, model).length > 0) return
-  const envName = {
-    openai_image: config.gptApiKeyEnv,
-    gemini: config.geminiApiKeyEnv,
-    grok_image: config.grokApiKeyEnv,
-    agnes_image: config.agnesApiKeyEnv,
-  }[modelProtocol(model)]
-  throw new Error(`缺少 ${label} API 密钥，请设置 ${envName}`)
+function createApiKeyResolver(ctx, config) {
+  return async (model, label) => {
+    const envName = apiKeyEnvForModel(config, model)
+    const credential = await ctx.credentials.resolve(envName)
+    const value = credential?.value.trim() ?? ''
+    if (value.length > 0) return value
+    throw new Error(`缺少 ${label} API 密钥，请在凭据设置中保存 ${envName}，或在启动环境中设置该变量`)
+  }
 }
 
 function normalizeEndpoint(endpoint) {

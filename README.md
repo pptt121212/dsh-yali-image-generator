@@ -1,8 +1,8 @@
 # DeepSeek-Harness 图像生成插件
 
-`deepseek-harness-yali-image-generator` 是一个可独立安装的 DeepSeek Harness Bundle，为 Agent 提供 `generate_image` 图像生成工具，并通过 Yali AI 异步图像网关调用模型。
+`dsh-yali-image-generator` 是一个可独立安装的 DeepSeek Harness Bundle，为 Agent 提供 `generate_image` 图像生成工具，并通过 Yali AI 异步图像网关调用模型。
 
-包名和 Harness 模块名使用小写技术标识 `deepseek-harness-yali-image-generator`，以符合 npm 与 Cordis 的解析规则；面向用户的插件名称和工具说明统一为“DeepSeek-Harness 图像生成插件”。
+包名和 Harness 模块名使用官方示例一致的 `dsh-` 前缀；面向用户的插件名称和工具说明统一为“DeepSeek-Harness 图像生成插件”。
 
 ## 官方规范符合性
 
@@ -34,7 +34,7 @@ Gemini 的本地参考图使用 `inlineData`，URL 参考图使用 `fileData`。
 发布到 npm 后，用户可直接安装：
 
 ```powershell
-dsh plugin --profile web add deepseek-harness-yali-image-generator
+dsh plugin --profile web add dsh-yali-image-generator
 dsh web --dump-config
 dsh web
 ```
@@ -44,16 +44,16 @@ dsh web
 公开 GitHub 仓库发布后，也可以直接从 Git 安装：
 
 ```powershell
-dsh plugin --profile web add github:pptt121212/DeepSeek-Harness-yali-image-generator
+dsh plugin --profile web add github:pptt121212/dsh-yali-image-generator
 dsh web
 ```
 
-GitHub 仓库名保留用户友好的大小写 `DeepSeek-Harness-yali-image-generator`；npm 包名使用规范化的小写 `deepseek-harness-yali-image-generator`。
+GitHub 仓库与 npm 包均使用 `dsh-yali-image-generator`。
 
 自定义或无界面 Profile 使用相同方式：
 
 ```powershell
-dsh plugin --profile my-profile add deepseek-harness-yali-image-generator
+dsh plugin --profile my-profile add dsh-yali-image-generator
 dsh --profile my-profile --dump-config
 dsh --profile my-profile
 ```
@@ -62,7 +62,7 @@ dsh --profile my-profile
 
 ## 配置密钥
 
-仅设置所选模型系列对应的环境变量：
+在 Harness 的凭据设置中保存所选模型系列对应的密钥，凭据引用名称如下：
 
 ```powershell
 $env:YALI_GEMINI_API_KEY = "..."
@@ -71,7 +71,7 @@ $env:YALI_GROK_API_KEY = "..."
 $env:YALI_AGNES_API_KEY = "..."
 ```
 
-默认接口地址为 `https://api.yaliai.com`。密钥环境变量名、接口地址、默认模型、规格、质量、超分参数、输出目录和异步超时均可通过安装后的 Profile 配置修改。
+也可以在启动 Harness 的环境中设置同名变量。插件会在每次生成时通过 Harness 凭据服务解析密钥，因此在设置页保存或更新密钥后无需重装插件。默认接口地址为 `https://api.yaliai.com`。密钥引用名称、接口地址、默认模型、规格、质量、超分参数、输出目录和异步超时均可通过安装后的 Profile 配置修改。
 
 ## 使用方式
 

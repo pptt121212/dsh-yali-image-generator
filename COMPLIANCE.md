@@ -6,14 +6,13 @@
 
 | 官方要求 | 状态 | 实现依据 |
 | --- | --- | --- |
-| 插件具备稳定的 `name`。 | 通过 | `index.js` 导出 `name = "deepseek-harness-yali-image-generator"`。 |
-| 声明所需服务。 | 通过 | 导出 `inject = ['tools']`。 |
+| 插件具备稳定的 `name`。 | 通过 | `index.js` 导出 `name = "dsh-yali-image-generator"`。 |
+| 声明所需服务。 | 通过 | 导出 `inject = ['tools', 'credentials']`。 |
 | 提供可验证的配置。 | 通过 | 导出 Schemastery `Config`，覆盖接口地址、密钥引用、默认值、目录、超时和限制。 |
 | 以 `apply(ctx, config)` 安装行为。 | 通过 | `apply` 在配置解析后注册工具。 |
 | 使用扩展点而非修改核心循环。 | 通过 | 仅使用官方 `tools` 服务和 `defineTool`。 |
 | 部署可变项可配置。 | 通过 | 端点、密钥变量、默认模型、输出目录、轮询和超时均为 `Config` 字段。 |
 | 错配应尽早明确失败。 | 通过 | 无效端点与输出目录在加载时失败；缺失模型密钥在请求前失败。 |
-| 本地 `--patch` 模块路径为绝对路径。 | 通过 | `local.patch.yml` 使用 Windows ESM 绝对 `file:///` URL。 |
 
 ## Bundle 打包与安装要求
 
@@ -21,8 +20,8 @@
 | --- | --- | --- |
 | 可分发插件是 Bundle，而不是 Profile。 | 通过 | `package.json` 仅声明 `dsh.bundle`。 |
 | Bundle 清单声明补丁文件。 | 通过 | `dsh.bundle.patch = "./cordis.patch.yml"`。 |
-| 补丁按包名插入插件行。 | 通过 | `cordis.patch.yml` 使用 `name: deepseek-harness-yali-image-generator`。 |
-| 用户可向指定 Profile 安装。 | 通过 | README 记录 `dsh plugin --profile <名称> add ...` 的 tarball、npm、Web 与自定义 Profile 命令。 |
+| 补丁按包名插入插件行。 | 通过 | `cordis.patch.yml` 使用 `name: dsh-yali-image-generator`。 |
+| 用户可向指定 Profile 安装。 | 通过 | README 记录 `dsh plugin --profile <名称> add ...` 的 npm、GitHub、Web 与自定义 Profile 命令。 |
 | Profile 管理 Bundle 顺序。 | 通过 | README 以 `--dump-config` 验证已安装配置，不要求用户手改清单。 |
 | git/源码安装可获得可执行文件。 | 通过 | 包含无需构建的 ESM `index.js`。 |
 
@@ -36,6 +35,7 @@
 | 模型可见内容单独渲染。 | 通过 | `output.render` 将规范结果转换为文本。 |
 | 基础设施故障抛出错误。 | 通过 | HTTP、异步任务、超时、下载、响应格式与凭据错误均明确抛出。 |
 | 尊重 `exec.signal`。 | 通过 | 请求、轮询等待、下载和本地文件读取均使用取消信号。 |
+| 凭据通过 Harness 凭据服务解析。 | 通过 | 每次生成通过 `ctx.credentials.resolve()` 按模型解析密钥引用；启动环境变量由凭据服务作为回退来源。 |
 | `presentationMeta` 可重放且为纯 JSON。 | 通过 | 仅从规范结果投影路径、媒体类型、模型、模式和任务 ID。 |
 | 展示函数为纯函数。 | 通过 | `presentCall` 和 `presentResult` 只读取参数、注册时配置和结果元数据。 |
 

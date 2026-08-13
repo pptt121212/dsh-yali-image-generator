@@ -1,6 +1,6 @@
 - insert:
-    - id: deepseek-harness-yali-image-generator
-      name: deepseek-harness-yali-image-generator
+    - id: dsh-yali-image-generator
+      name: dsh-yali-image-generator
       config:
         endpoint: 'https://api.yaliai.com'
         gptApiKeyEnv: 'YALI_GPT_API_KEY'
