@@ -1,0 +1,47 @@
+{
+  "name": "deepseek-harness-yali-image-generator",
+  "version": "0.1.0",
+  "description": "DeepSeek-Harness 图像生成插件，提供基于 Yali AI 异步网关的图像生成工具。",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pptt121212/DeepSeek-Harness-yali-image-generator.git"
+  },
+  "homepage": "https://github.com/pptt121212/DeepSeek-Harness-yali-image-generator#readme",
+  "bugs": {
+    "url": "https://github.com/pptt121212/DeepSeek-Harness-yali-image-generator/issues"
+  },
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "README.md",
+    "COMPLIANCE.md"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh-plugin",
+    "image-generation",
+    "yali-ai"
+  ],
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-tools": "0.1.0-rc.6",
+    "@deepseek-ai/schemastery": "3.18.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "4.0.1"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

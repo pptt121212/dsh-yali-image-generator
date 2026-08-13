@@ -1,0 +1,17 @@
+- insert:
+    - id: deepseek-harness-yali-image-generator
+      name: deepseek-harness-yali-image-generator
+      config:
+        endpoint: 'https://api.yaliai.com'
+        gptApiKeyEnv: 'YALI_GPT_API_KEY'
+        geminiApiKeyEnv: 'YALI_GEMINI_API_KEY'
+        grokApiKeyEnv: 'YALI_GROK_API_KEY'
+        agnesApiKeyEnv: 'YALI_AGNES_API_KEY'
+        defaultModel: 'gemini-3.1-flash-image-preview'
+        defaultAspectRatio: '16:9'
+        defaultImageSize: '4K'
+        defaultQuality: 'medium'
+        defaultGenerationMode: 'default'
+        defaultUpscaleModel: 'gemini-3-pro-image-preview'
+        defaultUpscaleImageSize: '4K'
+        outputDir: './generated/yali-images'
