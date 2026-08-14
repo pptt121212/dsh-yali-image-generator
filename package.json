@@ -1,7 +1,7 @@
 {
   "name": "dsh-yali-image-generator",
-  "version": "0.1.0",
-  "description": "DeepSeek-Harness 图像生成插件，提供基于 Yali AI 异步网关的图像生成工具。",
+  "version": "0.1.1",
+  "description": "DeepSeek-Harness 图像生成插件。申请 Yali AI API Key：https://api.yaliai.com/",
   "license": "MIT",
   "repository": {
     "type": "git",

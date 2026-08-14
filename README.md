@@ -9,7 +9,7 @@
 本插件遵循 DeepSeek Harness 的 `docs/user/develop/basic` 与 `docs/cookbook/adding-a-tool.md`：
 
 - 这是 Bundle，不是 Profile；`package.json` 通过 `dsh.bundle.patch` 声明安装补丁。
-- 插件导出 `name`、`inject = ['tools']`、Schemastery `Config` 和 `apply(ctx, config)`。
+- 插件导出 `name`、`inject = ['tools', 'credentials']`、Schemastery `Config` 和 `apply(ctx, config)`。
 - 工具通过 `ctx.tools.register(defineTool(...))` 注册；执行结果是由 `output.schema` 定义的规范 JSON，模型可见文本由 `output.render` 单独渲染。
 - 接口地址、密钥环境变量、模型默认值、输出位置、超时和轮询参数均为可配置项；配置或凭据错误会明确失败。
 
@@ -61,6 +61,8 @@ dsh --profile my-profile
 本包直接发布 ESM 运行时文件，不需要构建步骤或 `prepare` 脚本。
 
 ## 配置密钥
+
+请先在 [Yali AI](https://api.yaliai.com/) 申请 API Key。
 
 在 Harness 的凭据设置中保存所选模型系列对应的密钥，凭据引用名称如下：
 
